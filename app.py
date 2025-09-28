@@ -28,13 +28,13 @@ def cookie_flags(resp):
     # En Flask, usa SESSION_COOKIE_* en config para hacerlo global
     return resp
 
-# Asegurar que el usario está autenticado
+# Página inicial
 @app.route("/", methods=["GET"])
 def root():
     return render_template("index.html")
 
-# Iniciar sesión y usar HTTPS
-@app.route("/login", methods=["POST"]) 
+# Iniciar sesión 
+@app.route("/login", methods=["POST", "GET"]) 
 def login():
     if request.method == "POST":
         user = request.form.get("user") # Obtener el nombre de usuario del formulario
@@ -49,7 +49,7 @@ def login():
     # return cookie_flags(resp)
 
 # Cerrar sesión
-@app.route("/logout", methods=["POST"]) 
+@app.route("/logout", methods=["POST", "GET"]) 
 def logout():
     if request.method == "POST":
         session.clear()
