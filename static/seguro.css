@@ -1,0 +1,66 @@
+/* Estilo para la página segura */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor centrado */
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+h1 {
+    color: #2ecc71; /* verde para indicar seguro */
+    margin-bottom: 20px;
+}
+
+p {
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Botón de cerrar sesión */
+button {
+    padding: 10px 20px;
+    background-color: #e9f2ff;
+    color: #779CAB;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+    background-color: #779CAB;
+    color: white;
+}
+
+/* Link para volver al inicio */
+a {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #e9f2ff;
+    color: #779CAB;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+a:hover {
+    background-color: #779CAB;
+    color: white;
+}

@@ -1,0 +1,102 @@
+/* Estilo para la página de registro */
+
+/* Estilo general de la página */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor centrado */
+.container {
+    max-width: 500px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #779CAB;
+    margin-bottom: 20px;
+}
+
+/* Mensajes de error y éxito */
+p {
+    text-align: center;
+    font-weight: bold;
+}
+
+p[style*="color:red"] {
+    color: #e74c3c;
+}
+
+p[style*="color:green"] {
+    color: #27ae60;
+}
+
+/* Formulario */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* separación entre campos */
+}
+
+label {
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="password"] {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Botón */
+button {
+    padding: 10px 15px;
+    background-color: #e9f2ff;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #779CAB;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+    background-color: #779CAB;
+    color: white;
+}
+
+/* Links */
+a {
+    display: inline-block;
+    margin-top: 10px;
+    color: #779CAB;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+}
+
+a:hover {
+    color: #0056a3;
+    text-decoration: underline;
+}
+
+/* Centrar todo dentro de un contenedor */
+body > form, body > h1, body > p, body > a {
+    text-align: center;
+}
+
+/* Agregar padding al contenedor si decides envolver todo en .container */
+body .container {
+    text-align: left;
+}

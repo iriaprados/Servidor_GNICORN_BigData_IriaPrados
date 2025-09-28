@@ -131,7 +131,7 @@ def inseguro():
 @app.route("/seguro")
 def seguro():
     if "user" not in session:
-        return "Acceso no autorizado. Debe iniciar sesión.", 401
+        return render_template("noauth.html"), 401  
 
     # Forzar HTTPS solo en producción
     if os.environ.get("FLASK_ENV") == "production":

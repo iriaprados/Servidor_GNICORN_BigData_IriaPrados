@@ -6,17 +6,21 @@
     <head>
         <meta charset="UTF-8">
         <title>Flask App</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+
     </head>
 
     <body>
-        <h1>Flask App - Endpoints Inseguro vs Seguro</h1>
-        <ul> <!-- Lista de endpoints -->
-            <li><a href="/register">Registrar nueva cuenta</a></li>
-            <li><a href="/login">Inicio de sesión</a></li>
-            <li><a href="/logout">Cerrar sesión</a></li>
-            <li><a href="/inseguro">Comprobación modelo inseguro</a></li>
-            <li><a href="/seguro">Comprobación modelo seguro</a></li>
-        </ul>
+        <div class="container">
+            <h1>Flask App - Endpoints Inseguro vs Seguro</h1>
+            <ul> <!-- Lista de endpoints -->
+                <li><a href="/register">Registrar nueva cuenta</a></li>
+                <li><a href="/login">Inicio de sesión</a></li>
+                <li><a href="/logout">Cerrar sesión</a></li>
+                <li><a href="/inseguro">Comprobación modelo inseguro</a></li>
+                <li><a href="/seguro">Comprobación modelo seguro</a></li>
+            </ul>
+        </div>
     </body>
 
 </html>

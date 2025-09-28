@@ -1,0 +1,21 @@
+<!-- Plantilla para el acceso no autorizado en la página segura de https -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Acceso Denegado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='noauth.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Acceso No Autorizado</h1>
+        <p>Debes iniciar sesión para acceder a esta página.</p>
+        <a href="/">Volver al menú principal</a>
+        <a href="/login">Ir a iniciar sesión</a>
+    </div>
+</body>
+
+</html>
+

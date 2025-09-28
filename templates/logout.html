@@ -1,17 +1,20 @@
-<!-- Plantilla para la página de logout -->
+<!-- Plantilla para el logout -->
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <title>Logout</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='logout.css') }}">
 </head>
 
 <body>
-    <h1> Sesión Cerrada</h1>
-    <p>{{ message }}</p> <!-- Mostrar al usuario que su sesión ha sido cerrada -->
-    
-    <a href="/">Volver a la página de incio</a>
+    <div class="container">
+        <h1>Sesión Cerrada</h1>
+        <p>{{ message }}</p> <!-- Mostrar al usuario que su sesión ha sido cerrada -->
+        
+        <a href="/">Volver a la página de inicio</a>
+    </div>
 </body>
 
 </html>

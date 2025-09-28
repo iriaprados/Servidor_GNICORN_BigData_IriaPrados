@@ -1,20 +1,21 @@
 <!-- Plantilla para el endpoint inseguro -->
 <!DOCTYPE html>
-
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <title>Endpoint Inseguro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='inseguro.css') }}">
 </head>
 
-
 <body>
-    <h1> Endpoint Inseguro</h1>
-    <p>Esta página está accesible sin autenticación y puede ser servida por <b>HTTP</b>.</p> <!-- Mostrar al usuario que esta en un http -->
-    <p>Esto demuestra un comportamiento <strong>no seguro</strong>.</p>
-    
-    <a href="/">Volver al inicio</a>
+    <div class="container">
+        <h1>Endpoint Inseguro</h1>
+        <p>Esta página está accesible sin autenticación y puede ser servida por <b>HTTP</b>.</p>
+        <p>Esto demuestra un comportamiento <strong>no seguro</strong>.</p>
+
+        <a href="/">Volver al inicio</a>
+    </div>
 </body>
 
 </html>

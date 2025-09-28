@@ -1,22 +1,26 @@
-<!-- Plantilla de inicio de sesión -->
+<!-- Plantilla para el login -->
 <!DOCTYPE html>
 <html>
 
-<head><title>Login</title></head>
+<head>
+    <title>Login</title>>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
 
 <body>
-    <h1>Login</h1>
-    {% if error %}<p style="color:red">{{ error }}</p>{% endif %}  <!-- Mensaje de error de incio de sesión  -->
-   
-    <form method="POST">
-        <label>Usuario: <input type="text" name="username"></label><br>
-        <label>Contraseña: <input type="password" name="password"></label><br>
-        <button type="submit">Iniciar sesión</button>
-    </form>
+    <div class="container">
+        <h1>Login</h1>
+        {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
 
-    <a href="/">Volver a la página de incio</a>
-    <a href="/register">No tengo cuenta</a>
-   
+        <form method="POST">
+            <label>Usuario: <input type="text" name="username"></label><br>
+            <label>Contraseña: <input type="password" name="password"></label><br>
+            <button type="submit">Iniciar sesión</button>
+        </form>
+
+        <a href="/">Volver a la página de inicio</a><br>
+        <a href="/register">No tengo cuenta</a>
+    </div>
 </body>
 
 </html>

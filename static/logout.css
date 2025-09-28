@@ -1,0 +1,47 @@
+/* Estilo para la página de logout */
+
+/* Estilo general de la página */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor centrado */
+.container {
+    max-width: 500px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+h1 {
+    color: #779CAB;
+    margin-bottom: 20px;
+}
+
+p {
+    font-weight: bold;
+    color: #27ae60; /* verde para indicar éxito */
+    margin-bottom: 20px;
+}
+
+/* Links */
+a {
+    display: inline-block;
+    margin-top: 10px;
+    color: #779CAB;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+}
+
+a:hover {
+    color: #0056a3;
+    text-decoration: underline;
+}
