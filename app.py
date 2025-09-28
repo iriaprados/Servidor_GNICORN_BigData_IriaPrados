@@ -45,8 +45,8 @@ def login():
         return render_template("login.html", user=user) # Redirigir a la página segura después del login
     return render_template("login.html")
     
-    # Alternativa: configurar en app.config: SESSION_COOKIE_SECURE=True, etc.
-    return cookie_flags(resp)
+    # # Alternativa: configurar en app.config: SESSION_COOKIE_SECURE=True, etc.
+    # return cookie_flags(resp)
 
 # Cerrar sesión
 @app.route("/logout", methods=["POST"]) 

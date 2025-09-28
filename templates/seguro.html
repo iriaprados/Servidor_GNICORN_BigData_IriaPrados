@@ -1,0 +1,22 @@
+<!-- Plantilla para el endpoint seguro -->
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Endpoint Seguro</title>
+</head>
+
+<body>
+    <h1>Endpoint Seguro</h1>
+
+    <p>Bienvenido, <strong>{{ user }}</strong>.</p> <!-- Mostrar el usuario autenticado -->
+    <p>Esta página requiere <b>sesión activa</b> y debe servirse únicamente por <b>HTTPS</b>.</p>  <!-- Mostrar al usario que esta usando https-->
+    <form method="POST" action="/logout">
+        <button type="submit">Cerrar sesión</button>
+    </form>
+    <a href="/">Volver al inicio</a>
+</body>
+
+</html>
