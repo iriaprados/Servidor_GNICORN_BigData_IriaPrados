@@ -1,0 +1,23 @@
+<!-- Plantilla de inicio de sesión -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+
+<body>
+    <h1>Login</h1>
+    <form method="POST"> <!-- Formulario de inicio de sesión -->
+        <label>Usuario: <input type="text" name="user"></label>
+        <button type="submit">Iniciar sesión</button>
+    </form>
+
+    <!-- Mensaje de bienvenida -->
+    {% if user %}
+        <p>Bienvenido, {{ user }} ✅</p>
+    {% endif %}
+</body>
+
+</html>
