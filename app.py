@@ -1,13 +1,35 @@
 from flask import Flask, request, session, jsonify, redirect, url_for, make_response, render_template
 from datetime import timedelta
 from werkzeug.middleware.proxy_fix import ProxyFix
+import sqlite3 # Importar la base de datos SQLite
+import os
+from werkzeug.security import generate_password_hash, check_password_hash # Para el hasheo de las contraseñas
 
 
-
+# Configuración de la base de datos SQLite y de la aplicación Flask
+user_db = "users.db"
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET", "claveSecretaLocal")  # usa var de entorno en producción
+app.permanent_session_lifetime = timedelta(minutes=30)
 
-app.secret_key = 'claveSecreta' # Clave secreta para la sesión
-app.permanent_session_lifetime = timedelta(minutes=30) # Duración de la sesión, después de 30 minutos de inactividad
+# Conexión con la base de datos y creación de las tablas
+def init_db():
+    conn = sqlite3.connect(user_db)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
+
+
 
 # Flags de cookie y lifetime (evita manejarlo “a mano”)
 app.config.update(
@@ -28,45 +50,77 @@ def cookie_flags(resp):
     # En Flask, usa SESSION_COOKIE_* en config para hacerlo global
     return resp
 
+
+
 # Página inicial
 @app.route("/", methods=["GET"])
 def root():
     return render_template("index.html")
 
+# Registro de usuarios
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if not username or not password:
+            return render_template("register.html", error="Faltan datos")
+
+        pw_hash = generate_password_hash(password)
+
+        conn = sqlite3.connect(user_db) # Conexión con la base de datos 
+        cur = conn.cursor()
+
+        try:
+            cur.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", (username, pw_hash))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            return render_template("register.html", error="El usuario ya existe")
+        finally:
+            conn.close()
+
+        return render_template("register.html", success="Usuario creado correctamente")
+    return render_template("register.html")
+
+
 # Iniciar sesión 
 @app.route("/login", methods=["POST", "GET"]) 
 def login():
     if request.method == "POST":
-        user = request.form.get("user") # Obtener el nombre de usuario del formulario
-        if not user:
-            return "Se necesita un nombre de usuario", 400
-        session.permanent = True
-        session["user"] = user
-        return render_template("login.html", user=user) # Redirigir a la página segura después del login
+        username = request.form.get("username") 
+        password= request.form.get("password")
+
+        # Conectar con la base de datos del usuario
+        conn = sqlite3.connect(user_db)
+        cur = conn.cursor()
+        cur.execute("SELECT password_hash FROM users WHERE username=?", (username,))
+        row = cur.fetchone()
+        conn.close()
+
+        if row and check_password_hash(row[0], password): 
+            session["user"] = username
+            return redirect(url_for("seguro")) # Se ha introducido correctamente los datos de la sesión
+        else:
+            return render_template("login.html", error="Usuario o contraseña incorrectos")
+        
     return render_template("login.html")
     
     # # Alternativa: configurar en app.config: SESSION_COOKIE_SECURE=True, etc.
     # return cookie_flags(resp)
 
 # Cerrar sesión
-@app.route("/logout", methods=["POST", "GET"]) 
+@app.route("/logout", methods=["POST"])
 def logout():
-    if request.method == "POST":
-        session.clear()
-        return render_template("logout.html", message="Sesión cerrada correctamente") # Redirigir a la página de logout
-    return render_template("logout.html")
+    session.clear()
+    return render_template("logout.html", message="Sesión cerrada correctamente")
+
         
  # Iniciar sesión no es necesario, metodo HTTP o HTTPS
 @app.route("/inseguro")
 def inseguro():
     return render_template("inseguro.html")
-    # """
-    # Información expuesta sin autenticación ni TLS garantizado
-    # """
-    # return jsonify({
-    #     "debug": True,
-    #     "message": "Este endpoint no requiere sesión y puede ir por HTTP."
-    # })
+
 
 # Iniciar sesión y usar HTTPS
 @app.route("/seguro") 
@@ -81,36 +135,8 @@ def seguro():
     return render_template("seguro.html", user=session["user"])
 
 
-
-
-
-
-
-
-
-
-
-
-
-    # """
-    # Requiere sesión y pretende servirse solo por HTTPS
-    # """
-    # if "user" not in session:
-    #     return jsonify({"error": "unauthorized"}), 401
-    
-    # # (Opcional) Comprobar esquema si el proxy pasa X-Forwarded-Proto
-    # scheme = request.headers.get("X-Forwarded-Proto", request.scheme)
-    # if scheme != "https":
-    #     return jsonify({"error": "use https"}), 400
-    
-    # return jsonify({
-    #     "secret": "contenido solo para usuarios autenticados por HTTPS",
-    #     "user": session["user"]
-
-
-
 # Ejecutar la aplicación
 if __name__ == "__main__":
-    app.secret_key = 'claveSecreta' # Clave secreta para la sesión
+    # app.secret_key = 'claveSecreta' # Clave secreta para la sesión
     app.run(debug=True, host="0.0.0.0", port=8080)
 
