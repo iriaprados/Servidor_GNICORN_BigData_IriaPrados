@@ -1,6 +1,6 @@
 from flask import Flask, request, session, jsonify, redirect, url_for, make_response, render_template
 from datetime import timedelta
-from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix 
 import sqlite3 # Importar la base de datos SQLite
 import os
 from werkzeug.security import generate_password_hash, check_password_hash # Para el hasheo de las contraseñas
@@ -28,9 +28,6 @@ def init_db():
 
 init_db()
 
-
-
-
 # Flags de cookie y lifetime (evita manejarlo “a mano”)
 app.config.update(
     SESSION_COOKIE_SECURE=True,
@@ -39,8 +36,16 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(minutes=30),
 )
 
+# Permitir el uso de cookies seguras en https
+if os.environ.get("FLASK_ENV") == "production":# Solo se usa la cookie si se usa un protocolo https
+    app.config["SESSION_COOKIE_SECURE"] = True
+else:
+    app.config["SESSION_COOKIE_SECURE"] = False
+
+
 # Respetar cabeceras del proxy (X-Forwarded-Proto)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
 
 def cookie_flags(resp):
     """
@@ -51,11 +56,11 @@ def cookie_flags(resp):
     return resp
 
 
-
 # Página inicial
 @app.route("/", methods=["GET"])
 def root():
     return render_template("index.html")
+
 
 # Registro de usuarios
 @app.route("/register", methods=["GET", "POST"])
@@ -100,7 +105,7 @@ def login():
 
         if row and check_password_hash(row[0], password): 
             session["user"] = username
-            return redirect(url_for("seguro")) # Se ha introducido correctamente los datos de la sesión
+            return render_template("seguro.html") # Se ha introducido correctamente los datos de la sesión
         else:
             return render_template("login.html", error="Usuario o contraseña incorrectos")
         
@@ -110,7 +115,7 @@ def login():
     # return cookie_flags(resp)
 
 # Cerrar sesión
-@app.route("/logout", methods=["POST"])
+@app.route("/logout", methods=["POST", "GET"])
 def logout():
     session.clear()
     return render_template("logout.html", message="Sesión cerrada correctamente")
@@ -123,15 +128,17 @@ def inseguro():
 
 
 # Iniciar sesión y usar HTTPS
-@app.route("/seguro") 
+@app.route("/seguro")
 def seguro():
     if "user" not in session:
-        return "Acceso no autorizado. Debe de iniciar sesión.", 401
-    
-    # Forzar HTTPS (directo o detrás de NGINX)
-    scheme = request.headers.get("X-Forwarded-Proto", request.scheme)
-    if scheme != "https":
-        return "Use HTTPS para este recurso.", 400
+        return "Acceso no autorizado. Debe iniciar sesión.", 401
+
+    # Forzar HTTPS solo en producción
+    if os.environ.get("FLASK_ENV") == "production":
+        scheme = request.headers.get("X-Forwarded-Proto", request.scheme)
+        if scheme != "https":
+            return "Use HTTPS para este recurso", 400
+
     return render_template("seguro.html", user=session["user"])
 
 

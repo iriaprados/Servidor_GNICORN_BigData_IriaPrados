@@ -8,11 +8,14 @@
     <h1>Registro</h1>
     {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
     {% if success %}<p style="color:green">{{ success }}</p>{% endif %}
+   
     <form method="POST">
         <label>Usuario: <input type="text" name="username"></label><br>
         <label>Contraseña: <input type="password" name="password"></label><br>
         <button type="submit">Registrar</button>
     </form>
+
+    <a href="/">Volver a la página de incio</a>
     <a href="/login">Ya tengo cuenta</a>
 </body>
 
