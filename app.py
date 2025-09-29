@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash # Para
 user_db = "users.db"
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET", "claveSecretaLocal")  # usa var de entorno en producción
-app.permanent_session_lifetime = timedelta(minutes=30)
+app.permanent_session_lifetime = timedelta(minutes=1)
 
 # Conexión con la base de datos y creación de las tablas
 def init_db():
