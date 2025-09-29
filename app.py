@@ -4,13 +4,16 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import sqlite3 # Importar la base de datos SQLite
 import os
 from werkzeug.security import generate_password_hash, check_password_hash # Para el hasheo de las contraseñas
-
+from flask_wtf import CSRFProtect
 
 # Configuración de la base de datos SQLite y de la aplicación Flask
 user_db = "users.db"
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET", "claveSecretaLocal")  # usa var de entorno en producción
-app.permanent_session_lifetime = timedelta(minutes=30)
+app.permanent_session_lifetime = timedelta(minutes=30) 
+
+# RF2: Protección CSRF
+csrf = CSRFProtect(app)
 
 # Conexión con la base de datos y creación de las tablas
 def init_db():
@@ -133,11 +136,12 @@ def seguro():
     if "user" not in session:
         return render_template("noauth.html"), 401  
 
-    # Forzar HTTPS solo en producción
-    if os.environ.get("FLASK_ENV") == "production":
-        scheme = request.headers.get("X-Forwarded-Proto", request.scheme)
-        if scheme != "https":
-            return "Use HTTPS para este recurso", 400
+    # RF2: Forzar HTTPS solo en producción
+    if os.environ.get("FLASK_ENV") == "production": # SI el entorno está en producción
+        scheme = request.headers.get("X-Forwarded-Proto", request.scheme) # Comprobar el esquema, http o https
+        if scheme != "https": # Si no es HTTPS
+            url = request.url.replace("http://", "https://", 1) # Redirigir a la versión HTTPS, para fallo de seguridad
+            return redirect(url, code=301) # Se ejecuta la redirección a HTTPS
 
     return render_template("seguro.html", user=session["user"])
 
