@@ -14,6 +14,7 @@ app.permanent_session_lifetime = timedelta(minutes=30)
 
 # RF2: Protección CSRF
 csrf = CSRFProtect(app)
+app.permanent_session_lifetime = timedelta(minutes=30)
 
 # Conexión con la base de datos y creación de las tablas
 def init_db():
@@ -149,5 +150,5 @@ def seguro():
 # Ejecutar la aplicación
 if __name__ == "__main__":
     # app.secret_key = 'claveSecreta' # Clave secreta para la sesión
-    app.run(debug=True, host="0.0.0.0", port=8080)
+    app.run(debug=True, host="127.0.0.1", port=8000)
 
