@@ -31,19 +31,15 @@ def init_db():
 
 init_db()
 
-# Flags de cookie y lifetime (evita manejarlo “a mano”)
+# Configuración de cookies según entorno
+is_production = os.environ.get("FLASK_ENV") == "production"
+
 app.config.update(
-    SESSION_COOKIE_SECURE=True,
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=is_production,      # Solo HTTPS en producción
+    SESSION_COOKIE_HTTPONLY=True,             # Protección XSS
+    SESSION_COOKIE_SAMESITE="Lax",            # Protección CSRF
     PERMANENT_SESSION_LIFETIME=timedelta(minutes=30),
 )
-
-# Permitir el uso de cookies seguras en https
-if os.environ.get("FLASK_ENV") == "production":# Solo se usa la cookie si se usa un protocolo https
-    app.config["SESSION_COOKIE_SECURE"] = True
-else:
-    app.config["SESSION_COOKIE_SECURE"] = False
 
 
 # Respetar cabeceras del proxy (X-Forwarded-Proto)
