@@ -14,7 +14,6 @@ app.permanent_session_lifetime = timedelta(minutes=30)
 
 # RF2: Protección CSRF
 csrf = CSRFProtect(app)
-app.permanent_session_lifetime = timedelta(minutes=30)
 
 # Conexión con la base de datos y creación de las tablas
 def init_db():
@@ -49,6 +48,11 @@ else:
 
 # Respetar cabeceras del proxy (X-Forwarded-Proto)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+def get_real_scheme():
+    """Obtener el esquema real considerando headers del proxy"""
+    return request.headers.get("X-Forwarded-Proto", request.scheme).lower()
+
 
 
 def cookie_flags(resp):
@@ -108,8 +112,9 @@ def login():
         conn.close()
 
         if row and check_password_hash(row[0], password): 
+            session.permanent = True
             session["user"] = username
-            return render_template("seguro.html") # Se ha introducido correctamente los datos de la sesión
+            return render_template("seguro.html", user=username) # Se ha introducido correctamente los datos de la sesión
         else:
             return render_template("login.html", error="Usuario o contraseña incorrectos")
         
@@ -121,30 +126,91 @@ def login():
 # Cerrar sesión
 @app.route("/logout", methods=["POST", "GET"])
 def logout():
+    user = session.get("user", "Usuario")
     session.clear()
-    return render_template("logout.html", message="Sesión cerrada correctamente")
+    return render_template("logout.html", message=f"Sesión de {user} cerrada correctamente")
 
         
- # Iniciar sesión no es necesario, metodo HTTP o HTTPS
+# Iniciar sesión no es necesario, metodo HTTP o HTTPS
 @app.route("/inseguro")
 def inseguro():
-    return render_template("inseguro.html")
+    """Endpoint inseguro que expone información sensible"""
+    scheme = get_real_scheme()
+    user_agent = request.headers.get('User-Agent', 'Desconocido')
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    
+    # RF2: Información sensible expuesta (vulnerabilidad demostrada)
+    sensitive_info = {
+        "scheme": scheme,
+        "ip_cliente": ip,
+        "user_agent": user_agent,
+        "session_data": dict(session) if session else "Sin sesión",
+        "headers_completos": dict(request.headers),
+        "secret_key_hint": app.secret_key[:8] + "...",
+        "server_info": f"Python Flask en {request.host}"
+    }
+
+    return render_template("inseguro.html", 
+                         scheme=scheme.upper(),
+                         sensitive_info=sensitive_info,
+                         vulnerabilities=[
+                             "❌ Accesible por HTTP (sin cifrado)",
+                             "❌ No requiere autenticación", 
+                             "❌ Expone información del sistema",
+                             "❌ Muestra headers y datos internos"
+                         ])
 
 
 # Iniciar sesión y usar HTTPS
 @app.route("/seguro")
 def seguro():
+    """Endpoint seguro con múltiples protecciones"""
+
+    # RF2: Verificar autenticación
     if "user" not in session:
         return render_template("noauth.html"), 401  
 
-    # RF2: Forzar HTTPS solo en producción
-    if os.environ.get("FLASK_ENV") == "production": # SI el entorno está en producción
-        scheme = request.headers.get("X-Forwarded-Proto", request.scheme) # Comprobar el esquema, http o https
-        if scheme != "https": # Si no es HTTPS
-            url = request.url.replace("http://", "https://", 1) # Redirigir a la versión HTTPS, para fallo de seguridad
-            return redirect(url, code=301) # Se ejecuta la redirección a HTTPS
+    # # RF2: Forzar HTTPS solo en producción
+    # if os.environ.get("FLASK_ENV") == "production": # SI el entorno está en producción
+    #     scheme = request.headers.get("X-Forwarded-Proto", request.scheme) # Comprobar el esquema, http o https
+    #     if scheme != "https": # Si no es HTTPS
+    #         url = request.url.replace("http://", "https://", 1) # Redirigir a la versión HTTPS, para fallo de seguridad
+    #         return redirect(url, code=301) # Se ejecuta la redirección a HTTPS
+    
+    # return render_template("seguro.html", user=session["user"])
+   
+    
+    
+    # RF5: Verificar HTTPS - Forzar siempre para endpoint seguro
+    scheme = get_real_scheme()
+    if scheme != "https":
+        https_url = request.url.replace("http://", "https://", 1)
+        return redirect(https_url, code=301)
 
-    return render_template("seguro.html", user=session["user"])
+    # RF2: Crear respuesta con headers de seguridad
+    user = session["user"]
+    response = make_response(render_template("seguro.html", 
+                                           user=user,
+                                           scheme=scheme.upper(),
+                                           security_measures=[
+                                               "✅ Autenticación verificada",
+                                               "✅ Protocolo HTTPS obligatorio",
+                                               "✅ Cookies con flags de seguridad",
+                                               "✅ Headers de seguridad aplicados"
+                                           ]))
+    
+    # RF2: Headers de seguridad adicionales
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    
+    # RF5: HSTS solo en HTTPS
+    if scheme == "https":
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    
+    return response
+    
+    # return render_template("seguro.html", user=session["user"])
 
 
 # Ejecutar la aplicación
