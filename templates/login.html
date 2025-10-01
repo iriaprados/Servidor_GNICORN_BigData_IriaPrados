@@ -14,7 +14,8 @@
 
         <form method="POST">
 
-            <input type="hidden" name="csrf_token" value="12345"/>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
 
             <label>Usuario: <input type="text" name="username"></label><br>
             <label>Contraseña: <input type="password" name="password"></label><br>
