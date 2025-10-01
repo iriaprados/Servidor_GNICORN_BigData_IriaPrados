@@ -12,7 +12,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET", "claveSecretaLocal")  # usa var de entorno en producción
 app.permanent_session_lifetime = timedelta(minutes=30) 
 
-# RF2: Protección CSRF
+# Opcional: Protección CSRF
 csrf = CSRFProtect(app) # Inicializar CSRFProtect para proteger a todas las rutas que usan métodos POST
 
 # Conexión con la base de datos y creación de las tablas
@@ -121,7 +121,7 @@ def login():
     # return cookie_flags(resp)
 
 # Cerrar sesión
-@app.route("/logout", methods=["POST"])
+@app.route("/logout", methods=["POST","GET"])
 def logout():
     user = session.get("user", "Usuario")
     session.clear()

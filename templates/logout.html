@@ -12,15 +12,8 @@
     <div class="container">
         <h1>Sesión Cerrada</h1>
         <p>{{ message }}</p> <!-- Mostrar al usuario que su sesión ha sido cerrada -->
-
-        <!-- Asegurar cerrar la sesión segura con CSRF -->
-        <form action="{{ url_for('logout') }}" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit">Volver a la página de inicio</button>
-        </form>
         
         <a href="/">Volver a la página de inicio</a>
-        
     </div>
 </body>
 
