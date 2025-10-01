@@ -4,7 +4,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import sqlite3 # Importar la base de datos SQLite
 import os
 from werkzeug.security import generate_password_hash, check_password_hash # Para el hasheo de las contraseñas
-from flask_wtf import CSRFProtect
+from flask_wtf import CSRFProtect #  Importar CSRFProtect para proteción de los métodos post 
 
 # Configuración de la base de datos SQLite y de la aplicación Flask
 user_db = "users.db"
@@ -13,7 +13,7 @@ app.secret_key = os.environ.get("FLASK_SECRET", "claveSecretaLocal")  # usa var 
 app.permanent_session_lifetime = timedelta(minutes=30) 
 
 # RF2: Protección CSRF
-csrf = CSRFProtect(app)
+csrf = CSRFProtect(app) # Inicializar CSRFProtect para proteger a todas las rutas que usan métodos POST
 
 # Conexión con la base de datos y creación de las tablas
 def init_db():
@@ -34,6 +34,7 @@ init_db()
 # Configuración de cookies según entorno
 is_production = os.environ.get("FLASK_ENV") == "production"
 
+# RF2: configuración de cookies seguras
 app.config.update(
     SESSION_COOKIE_SECURE=is_production,      # Solo HTTPS en producción
     SESSION_COOKIE_HTTPONLY=True,             # Protección XSS
@@ -120,14 +121,14 @@ def login():
     # return cookie_flags(resp)
 
 # Cerrar sesión
-@app.route("/logout", methods=["POST", "GET"])
+@app.route("/logout", methods=["POST"])
 def logout():
     user = session.get("user", "Usuario")
     session.clear()
     return render_template("logout.html", message=f"Sesión de {user} cerrada correctamente")
 
         
-# Iniciar sesión no es necesario, metodo HTTP o HTTPS
+# RF2: Iniciar sesión no es necesario, metodo HTTP o HTTPS
 @app.route("/inseguro")
 def inseguro():
     """Endpoint inseguro que expone información sensible"""
@@ -157,7 +158,7 @@ def inseguro():
                          ])
 
 
-# Iniciar sesión y usar HTTPS
+# RF2: Iniciar sesión y usar HTTPS
 @app.route("/seguro")
 def seguro():
     """Endpoint seguro con múltiples protecciones"""
@@ -165,17 +166,6 @@ def seguro():
     # RF2: Verificar autenticación
     if "user" not in session:
         return render_template("noauth.html"), 401  
-
-    # # RF2: Forzar HTTPS solo en producción
-    # if os.environ.get("FLASK_ENV") == "production": # SI el entorno está en producción
-    #     scheme = request.headers.get("X-Forwarded-Proto", request.scheme) # Comprobar el esquema, http o https
-    #     if scheme != "https": # Si no es HTTPS
-    #         url = request.url.replace("http://", "https://", 1) # Redirigir a la versión HTTPS, para fallo de seguridad
-    #         return redirect(url, code=301) # Se ejecuta la redirección a HTTPS
-    
-    # return render_template("seguro.html", user=session["user"])
-   
-    
     
     # RF5: Verificar HTTPS - Forzar siempre para endpoint seguro
     scheme = get_real_scheme()
@@ -206,8 +196,6 @@ def seguro():
     
     return response
     
-    # return render_template("seguro.html", user=session["user"])
-
 
 # Ejecutar la aplicación
 if __name__ == "__main__":
