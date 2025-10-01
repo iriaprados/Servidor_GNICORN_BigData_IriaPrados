@@ -4,17 +4,17 @@
 
 <head>
     <title>Login</title>>
-    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <link rel="stylesheet" href="/static/login.css">
 </head>
 
 <body>
     <div class="container">
         <h1>Login</h1>
-        {% if error %}<p style="color:red">{{ error }}</p>{% endif %}
+        
 
         <form method="POST">
 
-            <input type="hidden" name="csrf_token" value="12345"/>
+            <input type="hidden" name="csrf_token" value="ImRmNTM1ODQ0OGViNjM0ODQyYjNhODZjM2UzMDE4MTM0MzQyYjhhYjYi.aN07uA.IvciGjVXKrHIebdf-Cx7LNbt98s"/>
 
             <label>Usuario: <input type="text" name="username"></label><br>
             <label>Contraseña: <input type="password" name="password"></label><br>
