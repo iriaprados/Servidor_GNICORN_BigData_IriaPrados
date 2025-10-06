@@ -34,14 +34,13 @@ init_db()
 # Configuración de cookies según entorno
 is_production = os.environ.get("FLASK_ENV") == "production"
 
-# RF2: configuración de cookies seguras
+# RF2: configuración de cookies seguras y uso de flags 
 app.config.update(
     SESSION_COOKIE_SECURE=is_production,      # Solo HTTPS en producción
     SESSION_COOKIE_HTTPONLY=True,             # Protección XSS
     SESSION_COOKIE_SAMESITE="Lax",            # Protección CSRF
     PERMANENT_SESSION_LIFETIME=timedelta(minutes=30),
 )
-
 
 # Respetar cabeceras del proxy (X-Forwarded-Proto)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
@@ -51,14 +50,13 @@ def get_real_scheme():
     return request.headers.get("X-Forwarded-Proto", request.scheme).lower()
 
 
-
-def cookie_flags(resp):
-    """
-    Forzar flags en cookies de sesión si el servidor está detrás de HTTPS.
-    En desarrollo, podéis parametrizar por entorno o encabezado X-Forwarded-Proto.
-    """
-    # En Flask, usa SESSION_COOKIE_* en config para hacerlo global
-    return resp
+# def cookie_flags(resp):
+#     """
+#     Forzar flags en cookies de sesión si el servidor está detrás de HTTPS.
+#     En desarrollo, podéis parametrizar por entorno o encabezado X-Forwarded-Proto.
+#     """
+#     # En Flask, usa SESSION_COOKIE_* en config para hacerlo global
+#     return resp
 
 
 # Página inicial
@@ -169,7 +167,7 @@ def seguro():
     
     # RF5: Verificar HTTPS - Forzar siempre para endpoint seguro
     scheme = get_real_scheme()
-    if scheme != "https":
+    if is_production and scheme != "https":
         https_url = request.url.replace("http://", "https://", 1)
         return redirect(https_url, code=301)
 
@@ -185,8 +183,8 @@ def seguro():
                                                "✅ Headers de seguridad aplicados"
                                            ]))
     
-    # RF2: Headers de seguridad adicionales
-    response.headers['X-Content-Type-Options'] = 'nosniff'
+    # RF2: Headers de seguridad adicionales 
+    response.headers['X-Content-Type-Options'] = 'nosniff' 
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-XSS-Protection'] = '1; mode=block'
     
