@@ -149,10 +149,10 @@ def inseguro():
                          scheme=scheme.upper(),
                          sensitive_info=sensitive_info,
                          vulnerabilities=[
-                             "❌ Accesible por HTTP (sin cifrado)",
-                             "❌ No requiere autenticación", 
-                             "❌ Expone información del sistema",
-                             "❌ Muestra headers y datos internos"
+                             " Accesible por HTTP (sin cifrado)",
+                             " No requiere autenticación", 
+                             " Expone información del sistema",
+                             " Muestra headers y datos internos"
                          ])
 
 
@@ -177,10 +177,10 @@ def seguro():
                                            user=user,
                                            scheme=scheme.upper(),
                                            security_measures=[
-                                               "✅ Autenticación verificada",
-                                               "✅ Protocolo HTTPS obligatorio",
-                                               "✅ Cookies con flags de seguridad",
-                                               "✅ Headers de seguridad aplicados"
+                                               " Autenticación verificada",
+                                               " Protocolo HTTPS obligatorio",
+                                               " Cookies con flags de seguridad",
+                                               " Headers de seguridad aplicados"
                                            ]))
     
     # RF2: Headers de seguridad adicionales 
