@@ -325,7 +325,7 @@ def listar_usuarios(): # Endpoint protegido, se necesita ser administrador para 
     rows = cur.fetchall()
     conn.close()
 
-    usuarios = [{'id': r[0], 'username': r[1], 'role': r[2]} for r in rows] # Lista de usuarios con su rol
+    usuarios= [{'username': r[0], 'role': r[1]} for r in rows] # Lista de usuarios con su rol
     return render_template("listar_usuarios.html", usuarios=usuarios, total=len(usuarios))
 
 # Práctica 2 RF2: Manejo de errores
