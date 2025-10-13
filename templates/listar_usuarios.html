@@ -1,0 +1,29 @@
+<!-- Plantilla para listar usuarios en la aplicación Flask  -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Usuarios (Admin)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='listar_usuarios.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Zona Administrativa</h1>
+        <p>Solo los usuarios con rol <strong>Administrador</strong> pueden acceder a esta sección.</p>
+
+        <div id="usuarios-container">
+            <h2>Usuarios registrados:</h2>
+            <ul>
+                {% for user in usuarios %}
+                    <li><strong>{{ user.username }}</strong> (rol: {{ user.role }})</li>
+                {% endfor %}
+            </ul>
+            <p class="mensaje">Total de usuarios: {{ total }}</p>
+        </div>
+
+        <a href="/">Volver al inicio</a>
+    </div>
+</body>
+</html>

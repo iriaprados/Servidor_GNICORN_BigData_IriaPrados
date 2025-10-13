@@ -1,0 +1,26 @@
+<!-- Plantilla del perfil de usuario protegido en la aplicación Flask -->
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Usuario Protegido</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='usuario_protegido.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Área Protegida - Usuario Autenticado</h1>
+        <p>Esta sección solo es accesible para usuarios autenticados mediante <strong>JWT</strong>.</p>
+
+        <div id="perfil-container">
+            <p><b>Nombre de usuario:</b> {{ username }}</p>
+            <p><b>Rol:</b> {{ role }}</p>
+            <p class="mensaje">Perfil accedido correctamente.</p>
+        </div>
+
+        <a href="/">Volver al inicio</a>
+    </div>
+</body>
+</html>
