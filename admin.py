@@ -1,35 +1,48 @@
-# Script para definir un usuario admin en la base de datos
-import sqlite3
-from werkzeug.security import generate_password_hash
+# --- Definir el rol de admin y establecer su contraseña ---
 
-DB = "users.db"
-username = "miusuario" # Nombre de tu usuario admin
-password = "1234" # Cambia esto por la contraseña que quieras
+import sys
+import os
 
-# Crear el hash seguro de la contraseña
-password_hash = generate_password_hash(password)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# Conexión a la base de datos
-conn = sqlite3.connect(DB)
-cur = conn.cursor()
+from app import create_app, db
+from app.models import User
 
-# Comprobamos si el usuario ya existe
-cur.execute("SELECT id FROM users WHERE username=?", (username,))
-row = cur.fetchone()
+# Crear o actualizar el usuario administrador
+def create_admin_user():
 
-if row:
-    # Si existe, actualizamos su contraseña y rol
-    cur.execute("UPDATE users SET password_hash=?, role='admin' WHERE username=?", (password_hash, username))
-    print(f"Usuario '{username}' actualizado como admin con nueva contraseña.")
-else:
-    # Si no existe, lo creamos como admin
-    cur.execute("INSERT INTO users (username, password_hash, role) VALUES (?, ?, 'admin')",
-                (username, password_hash))
-    print(f"Usuario '{username}' creado como admin con contraseña establecida.")
+    app = create_app()
+    
+    with app.app_context():
 
-conn.commit()
-conn.close()
+        # Datos del admin
+        username = "miusuario"
+        password = "1234"
+        email = "admin@ejemplo.com"
+        
+        # Buscar si existe
+        user = User.query.filter_by(username=username).first()
+        
+        if user:
+            # Actualizar existente
+            user.set_password(password)
+            user.role = 'admin'
+            user.email = email
+            db.session.commit()
+            print(f" Usuario '{username}' actualizado como admin") # Actualizar existente
 
-print("Contraseña guardada correctamente. Puedes iniciar sesión con:")
-print(f"Usuario: {username}")
-print(f"Contraseña: {password}")
+        else:
+            # Crear nuevo
+            user = User(username=username, email=email, role='admin')
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            print(f" Usuario '{username}' creado como admin") # Crear nuevo
+        
+        print(f"\nCredenciales:")
+        print(f"   Usuario: {username}")
+        print(f"   Contraseña: {password}")
+        print(f"   Rol: admin")
+
+if __name__ == "__main__":
+    create_admin_user()
