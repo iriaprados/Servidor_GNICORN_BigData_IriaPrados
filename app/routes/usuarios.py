@@ -10,9 +10,9 @@ import json
 
 bp = Blueprint('usuarios', __name__) # Crear un blueprint para las rutas de usuarios
 
-@bp.route('/usuarios/panel', methods=['GET'])
-def panel_usuarios():
-    return render_template('usuarios.html')
+# @bp.route('/usuarios/panel', methods=['GET'])
+# def panel_usuarios():
+#     return render_template('usuarios.html')
 
 # Registros de usuarios via API
 @bp.route('/usuarios/register', methods=['POST'])

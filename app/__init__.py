@@ -54,23 +54,50 @@ def create_app(config_name='default'):
     # Swagger para documentación de la API
     swagger_template = {
 
-        "swagger": "2.0",
+    "swagger": "2.0",
 
-        "info": {
-            "title": "API REST - Práctica 2",
-            "description": "API con JWT, SQLAlchemy y Flask",
-            "version": "1.0.0"
-        },
+    "info": {
+        "title": "API REST - Práctica 2",
+        "description": "API con JWT, SQLAlchemy y Flask",
+        "version": "1.0.0"
+        
+    }, #  Definir que se necesita autenticación Bearer para toda la API
 
-        "securityDefinitions": {
-            "Bearer": {
-                "type": "apiKey",
-                "name": "Authorization",
-                "in": "header",
-                "description": "JWT Authorization header usando el esquema Bearer. Ejemplo: 'Bearer {token}'"
-            }
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT Authorization header usando el esquema Bearer. Ejemplo: 'Bearer {token}'"
         }
-    }
+    },
+
+    "security": [
+        {
+            "Bearer": []
+        }
+    ]
+}
+
+    # swagger_template = {
+
+    #     "swagger": "2.0",
+
+    #     "info": {
+    #         "title": "API REST - Práctica 2",
+    #         "description": "API con JWT, SQLAlchemy y Flask",
+    #         "version": "1.0.0"
+    #     },
+
+    #     "securityDefinitions": {
+    #         "Bearer": {
+    #             "type": "apiKey",
+    #             "name": "Authorization",
+    #             "in": "header",
+    #             "description": "JWT Authorization header usando el esquema Bearer. Ejemplo: 'Bearer {token}'"
+    #         }
+    #     }
+    # }
     
     Swagger(app, template=swagger_template) # Inicializar Swagger
 
@@ -84,7 +111,7 @@ def create_app(config_name='default'):
     
     csrf.exempt(usuarios_bp)
     csrf.exempt(productos_bp)
-    
+
     app.register_blueprint(usuarios_bp, url_prefix='/api')
     app.register_blueprint(productos_bp, url_prefix='/api')
     
