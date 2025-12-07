@@ -9,8 +9,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from app import create_app, db
 from app.models import User, Producto
 
+# Inicializar la base de datos
 def init_database():
-    """Inicializa la base de datos y crea las tablas"""
+   
     print(" Iniciando configuración de la base de datos...")
     
     app = create_app('development')

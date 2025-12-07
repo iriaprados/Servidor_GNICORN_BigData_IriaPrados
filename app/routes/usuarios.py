@@ -2,6 +2,7 @@
 
 from flask import Blueprint, request, jsonify, current_app
 from marshmallow import ValidationError
+from flasgger import swag_from 
 from app.models import db, User
 from app.schemas import user_schema, users_schema, user_update_schema
 from app.utils import generar_jwt, token_requerido, admin_requerido
@@ -11,6 +12,38 @@ bp = Blueprint('usuarios', __name__) # Crear un blueprint para las rutas de usua
 
 # Registros de usuarios via API
 @bp.route('/usuarios/register', methods=['POST'])
+
+# Documentación Swagger para la ruta de registro
+@swag_from({
+
+    'tags': ['Usuarios'],
+    'summary': 'Registrar un nuevo usuario',
+    'parameters': [{
+
+        'name': 'body',
+        'in': 'body',
+        'required': True,
+        'schema': {
+
+            'type': 'object',
+            'required': ['username', 'password'],
+            'properties': {
+
+                'username': {'type': 'string', 'example': 'juan'},
+                'email': {'type': 'string', 'example': 'juan@example.com'},
+                'password': {'type': 'string', 'example': '1234'}
+            }
+        }
+    }],
+
+    'responses': {
+        201: {'description': 'Usuario creado exitosamente'},
+        400: {'description': 'Error de validación'}
+    }
+
+})
+
+# Registro de usuario
 def register_api():
     
     try: # Validar y deserializar los datos de entrada
@@ -32,6 +65,44 @@ def register_api():
 
 # Login de usuarios via API
 @bp.route('/usuarios/login', methods=['POST'])
+# Documentación Swagger para la ruta de login
+@swag_from({ 
+
+    'tags': ['Usuarios'],
+    'summary': 'Iniciar sesión y obtener token JWT',
+    'parameters': [{
+
+        'name': 'body',
+        'in': 'body',
+        'required': True,
+        'schema': {
+
+            'type': 'object',
+            'required': ['username', 'password'],
+            'properties': {
+
+                'username': {'type': 'string', 'example': 'miusuario'},
+                'password': {'type': 'string', 'example': '1234'}
+            }
+        }
+    }],
+
+    'responses': {
+        200: {
+            'description': 'Token JWT generado',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'access_token': {'type': 'string'},
+                    'user': {'type': 'object'}
+                }
+            }
+        },
+        401: {'description': 'Credenciales inválidas'}
+    }
+})
+
+# Login de usuario
 def login_api():
     
     data = request.json # Obtener datos de la solicitud
@@ -67,6 +138,18 @@ def login_api():
 @bp.route('/usuarios', methods=['GET'])
 @admin_requerido
 
+# Documentación Swagger para la ruta de listar usuarios
+@swag_from({ 
+    'tags': ['Usuarios'],
+    'summary': 'Listar todos los usuarios (requiere admin)',
+    'security': [{'Bearer': []}],
+    'responses': {
+        200: {'description': 'Lista de usuarios'},
+        403: {'description': 'Acceso denegado'}
+    }
+})
+
+# Obtener todos los usuarios
 def get_usuarios():
   
     # Intentar usar caché de Redis
@@ -102,6 +185,27 @@ def get_usuarios():
 @bp.route('/usuarios/<int:id>', methods=['GET'])
 @token_requerido
 
+# Documentación Swagger para la ruta de obtener usuario por ID
+@swag_from({  
+
+    'tags': ['Usuarios'],
+    'summary': 'Obtener un usuario por ID',
+    'security': [{'Bearer': []}],
+    'parameters': [{
+
+        'name': 'id',
+        'in': 'path',
+        'type': 'integer',
+        'required': True,
+        'description': 'ID del usuario'
+    }],
+
+    'responses': {
+        200: {'description': 'Usuario encontrado'},
+        404: {'description': 'Usuario no encontrado'}
+    }
+})
+
 def get_usuario(id):
     user = User.query.get_or_404(id) # Buscar usuario por ID o devolver 404
     return jsonify(user.to_dict()), 200 
@@ -110,6 +214,46 @@ def get_usuario(id):
 @bp.route('/usuarios/<int:id>', methods=['PUT'])
 @token_requerido
 
+# Documentación Swagger para la ruta de actualizar usuario
+@swag_from({  
+
+    'tags': ['Usuarios'],
+    'summary': 'Actualizar un usuario',
+    'security': [{'Bearer': []}],
+    'parameters': [
+
+        {
+            'name': 'id',
+            'in': 'path',
+            'type': 'integer',
+            'required': True,
+            'description': 'ID del usuario'
+        },
+
+        {
+            'name': 'body',
+            'in': 'body',
+            'schema': {
+
+                'type': 'object',
+                'properties': {
+
+                    'username': {'type': 'string', 'example': 'nuevo_nombre'},
+                    'email': {'type': 'string', 'example': 'nuevo@email.com'},
+                    'password': {'type': 'string', 'example': 'nueva_pass'}
+                }
+            }
+        }
+    ],
+
+    'responses': {
+        200: {'description': 'Usuario actualizado'},
+        403: {'description': 'No tienes permiso'},
+        404: {'description': 'Usuario no encontrado'}
+    }
+})
+
+# Actualizar usuario
 def update_usuario(id):
 
     user = User.query.get_or_404(id) # Buscar usuario por ID o devolver 404
@@ -147,6 +291,28 @@ def update_usuario(id):
 @bp.route('/usuarios/<int:id>', methods=['DELETE'])
 @admin_requerido
 
+# Documentación Swagger para la ruta de eliminar usuario
+@swag_from({  
+
+    'tags': ['Usuarios'],
+    'summary': 'Eliminar un usuario (requiere admin)',
+    'security': [{'Bearer': []}],
+    'parameters': [{
+
+        'name': 'id',
+        'in': 'path',
+        'type': 'integer',
+        'required': True,
+        'description': 'ID del usuario a eliminar'
+    }],
+
+    'responses': {
+        200: {'description': 'Usuario eliminado'},
+        403: {'description': 'Acceso denegado'},
+        404: {'description': 'Usuario no encontrado'}
+    }
+})
+
 def delete_usuario(id):
     
     user = User.query.get_or_404(id) # Buscar usuario por ID o devolver 404
@@ -167,6 +333,20 @@ def delete_usuario(id):
 @bp.route('/usuarios/privado', methods=['GET'])
 @token_requerido
 
+# Documentación Swagger para la ruta privada
+@swag_from({  
+
+    'tags': ['Usuarios'],
+    'summary': 'Endpoint de prueba protegido con JWT',
+    'security': [{'Bearer': []}],
+    'responses': {
+
+        200: {'description': 'Acceso autorizado'},
+        401: {'description': 'Token requerido o inválido'}
+    }
+})
+
+# Endpoint privado de prueba
 def privado():
     return jsonify({
         "msg": "Acceso autorizado", 
