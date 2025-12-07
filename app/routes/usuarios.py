@@ -1,6 +1,6 @@
 # ------  Rutas relacionadas con la gestión de usuarios ------
 
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, render_template
 from marshmallow import ValidationError
 from flasgger import swag_from 
 from app.models import db, User
@@ -9,6 +9,10 @@ from app.utils import generar_jwt, token_requerido, admin_requerido
 import json
 
 bp = Blueprint('usuarios', __name__) # Crear un blueprint para las rutas de usuarios
+
+@bp.route('/usuarios/panel', methods=['GET'])
+def panel_usuarios():
+    return render_template('usuarios.html')
 
 # Registros de usuarios via API
 @bp.route('/usuarios/register', methods=['POST'])

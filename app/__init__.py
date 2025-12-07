@@ -2,10 +2,12 @@
 
 from flask import Flask, render_template, request, session, redirect, url_for, make_response, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
 from flask_migrate import Migrate
 from flasgger import Swagger
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
+import os
 import redis
 
 from app.config import config
@@ -16,10 +18,16 @@ csrf = CSRFProtect()
 swagger = Swagger()
 redis_client = None
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Crear la aplicación Flask 
 def create_app(config_name='default'):
 
-    app = Flask(__name__, template_folder='../templates', static_folder='../static')
+    app = Flask(
+        __name__,
+        template_folder=os.path.join(BASE_DIR, '..', 'templates'),
+        static_folder=os.path.join(BASE_DIR, '..', 'static')
+)
     
     # Cargar la configuración
     app.config.from_object(config[config_name])
@@ -68,11 +76,14 @@ def create_app(config_name='default'):
 
     # Proxy fix (NGINX)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)  
-    print("✅ ProxyFix configurado")
+    print(" ProxyFix configurado")
 
     # Registrar blueprints API
     from app.routes.usuarios import bp as usuarios_bp
     from app.routes.productos import bp as productos_bp
+    
+    csrf.exempt(usuarios_bp)
+    csrf.exempt(productos_bp)
     
     app.register_blueprint(usuarios_bp, url_prefix='/api')
     app.register_blueprint(productos_bp, url_prefix='/api')
@@ -121,6 +132,10 @@ def register_legacy_routes(app):
             return render_template("register.html", success="Usuario creado correctamente")
         
         return render_template("register.html")
+    
+    @app.route('/usuarios/panel')
+    def panel_usuarios():
+     return render_template('usuarios.html')
     
     # Ruta de login de usuarios
     @app.route("/login", methods=["POST", "GET"])
