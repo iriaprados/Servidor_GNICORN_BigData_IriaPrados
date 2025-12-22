@@ -14,7 +14,7 @@ class Config:
 
     # Base de datos ← ESTAS LÍNEAS DEBEN ESTAR INDENTADAS
     SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL", 
+        "SQLALCHEMY_DATABASE_URI", 
         "sqlite:///users.db"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False   

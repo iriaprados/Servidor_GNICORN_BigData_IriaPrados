@@ -13,7 +13,7 @@ import redis
 from app.config import config
 from app.models import db
 
-migrate = Migrate()
+migrate = Migrate(compare_type=True)
 csrf = CSRFProtect()
 swagger = Swagger()
 redis_client = None
@@ -79,25 +79,6 @@ def create_app(config_name='default'):
     ]
 }
 
-    # swagger_template = {
-
-    #     "swagger": "2.0",
-
-    #     "info": {
-    #         "title": "API REST - Práctica 2",
-    #         "description": "API con JWT, SQLAlchemy y Flask",
-    #         "version": "1.0.0"
-    #     },
-
-    #     "securityDefinitions": {
-    #         "Bearer": {
-    #             "type": "apiKey",
-    #             "name": "Authorization",
-    #             "in": "header",
-    #             "description": "JWT Authorization header usando el esquema Bearer. Ejemplo: 'Bearer {token}'"
-    #         }
-    #     }
-    # }
     
     Swagger(app, template=swagger_template) # Inicializar Swagger
 
