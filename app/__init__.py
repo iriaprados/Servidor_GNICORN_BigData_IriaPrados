@@ -2,13 +2,13 @@
 
 from flask import Flask, render_template, request, session, redirect, url_for, make_response, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask
 from flask_migrate import Migrate
 from flasgger import Swagger
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 import redis
+from app.cache import CacheManager
 
 from app.config import config
 from app.models import db
@@ -19,6 +19,7 @@ swagger = Swagger()
 redis_client = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 # Crear la aplicación Flask 
 def create_app(config_name='default'):
@@ -41,15 +42,22 @@ def create_app(config_name='default'):
     migrate.init_app(app, db)
     csrf.init_app(app)
 
-    # Redis para manejo de sesiones
+    # Redis para manejo de sesiones y caché
     global redis_client
     try:
         redis_client = redis.from_url(app.config['REDIS_URL'], decode_responses=True)
         redis_client.ping()
         print("✅ Redis conectado correctamente")
+        
+        # Inicializar gestor de caché
+        cache_manager = CacheManager(redis_client)
+        app.cache_manager = cache_manager
+        print("✅ CacheManager inicializado")
+        
     except Exception as e:
         print(f"⚠️  Redis no disponible: {e}")
         redis_client = None
+        app.cache_manager = None
     
     # Swagger para documentación de la API
     swagger_template = {

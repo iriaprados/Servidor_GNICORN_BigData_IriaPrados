@@ -6,13 +6,12 @@ from flasgger import swag_from
 from app.models import db, User
 from app.schemas import user_schema, users_schema, user_update_schema
 from app.utils import generar_jwt, token_requerido, admin_requerido
+from app.cache import cache_result, invalidate_cache # Importar funciones de caché
 import json
 
 bp = Blueprint('usuarios', __name__) # Crear un blueprint para las rutas de usuarios
 
-# @bp.route('/usuarios/panel', methods=['GET'])
-# def panel_usuarios():
-#     return render_template('usuarios.html')
+
 
 # Registros de usuarios via API
 @bp.route('/usuarios/register', methods=['POST'])
@@ -141,6 +140,7 @@ def login_api():
 # Listar todos los usuarios (solo admin)
 @bp.route('/usuarios', methods=['GET'])
 @admin_requerido
+@cache_result(key_prefix="usuarios:all", ttl=300) # Almacenar en caché por 5 minutos
 
 # Documentación Swagger para la ruta de listar usuarios
 @swag_from({ 
@@ -281,13 +281,9 @@ def update_usuario(id):
     
     db.session.commit() # Guardar cambios en la base de datos
     
-    # Invalidar caché
-    from app import redis_client
-    if redis_client:
-        try:
-            redis_client.delete("usuarios:all")
-        except:
-            pass
+    # Invalidar caché después de la actualización del write- through
+    invalidate_cache("usuarios:*")  # Invalidate all user-related cache keys
+    print(f" Usuario {id} actualizado, caché invalidado")
     
     return jsonify({"message": "Usuario actualizado", "user": user.to_dict()}), 200
 
@@ -323,15 +319,12 @@ def delete_usuario(id):
     db.session.delete(user) # Eliminar usuario de la base de datos
     db.session.commit() # Guardar cambios
     
-    # Invalidar caché
-    from app import redis_client
-    if redis_client:
-        try:
-            redis_client.delete("usuarios:all")
-        except:
-            pass
+    # Invalidar caché después de la eliminación del write-through
+    invalidate_cache("usuarios:*")
+    print(f" Usuario {id} eliminado, caché invalidado")
     
     return jsonify({"message": "Usuario eliminado"}), 200
+
 
 # Ruta protegida de ejemplo
 @bp.route('/usuarios/privado', methods=['GET'])
@@ -357,3 +350,61 @@ def privado():
         "user": request.user,
         "role": request.role
     }), 200
+
+
+# Endpoint privado de prueba de estadísticas de caché
+@bp.route('/usuarios/cache/stats', methods=['GET'])
+@admin_requerido
+
+@swag_from({
+
+    'tags': ['Usuarios'],
+    'summary': 'Obtener estadísticas del sistema de caché (admin)',
+    'security': [{'Bearer': []}],
+    'responses': {
+
+        200: {
+            'description': 'Estadísticas de caché Redis',
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'application_stats': {'type': 'object'},
+                    'redis_stats': {'type': 'object'},
+                    'timestamp': {'type': 'string'}
+                }
+            }
+        }
+    }
+})
+
+# Endpoint de estadísticas de caché
+def cache_stats():
+
+    from flask import current_app
+    
+    if hasattr(current_app, 'cache_manager'): # Verificar si el cache_manager está disponible
+        stats = current_app.cache_manager.get_stats() # Obtener estadísticas
+        return jsonify(stats), 200 
+    else:
+        return jsonify({"error": "Cache manager no disponible"}), 503 # Servicio no disponible
+
+# Limipiar toda la caché (solo admin)
+@bp.route('/usuarios/cache/clear', methods=['POST'])
+@admin_requerido
+
+@swag_from({
+
+    'tags': ['Usuarios'],
+    'summary': 'Limpiar toda la caché (admin) - Usar con precaución',
+    'security': [{'Bearer': []}],
+
+    'responses': {
+        200: {'description': 'Caché limpiado'},
+        503: {'description': 'Redis no disponible'}
+    }
+})
+
+# Endpoint para limpiar toda la caché
+def clear_cache():
+    invalidate_cache("*")
+    return jsonify({"message": "Caché completamente limpiado"}), 200
