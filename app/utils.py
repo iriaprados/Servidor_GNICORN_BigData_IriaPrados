@@ -1,7 +1,7 @@
 # ------- Utilidades para manejo de JWT y protección de rutas -------
 
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from flask import request, jsonify
 
@@ -11,8 +11,8 @@ def generar_jwt(username, role, secret, algorithm, hours):
     payload = { # Datos del token
         "user": username,
         "role": role,
-        "iat": datetime.utcnow(),
-        "exp": datetime.utcnow() + timedelta(hours=hours)
+        "iat": datetime.now(timezone.utc),
+        "exp": datetime.now(timezone.utc) + timedelta(hours=hours)
     }
     return jwt.encode(payload, secret, algorithm=algorithm)
 
