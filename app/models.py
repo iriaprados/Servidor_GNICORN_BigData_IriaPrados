@@ -1,1 +1,0 @@
-# Archivo obsoleto  - información movida a app/models

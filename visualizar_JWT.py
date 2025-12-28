@@ -1,4 +1,5 @@
-# Archivo para ver los datos del JWT
+# ----- Archivo de prueba para visualizar y decodificar un JWT -----
+
 import jwt
 
 # Para probar se pega la cookie token del navegador en /seguro
