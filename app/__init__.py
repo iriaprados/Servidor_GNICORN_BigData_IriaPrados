@@ -24,17 +24,21 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Fábrica de aplicación Flask
 def create_app(config_name='default'):
     
-    # Crear instancia de Flask
+    # Crear instancia de Flask con rutas a views/
     app = Flask(
         __name__,
-        template_folder=os.path.join(BASE_DIR, '..', 'templates'),
-        static_folder=os.path.join(BASE_DIR, '..', 'static')
+        template_folder=os.path.join(BASE_DIR, 'views', 'templates'),  # ← CAMBIO
+        static_folder=os.path.join(BASE_DIR, 'views', 'static')        # ← CAMBIO
     )
     
     # Cargar configuración según entorno
     app.config.from_object(config[config_name])
     
     # Mostrar configuración clave en consola
+    # Vistas de la aplicación
+    print(f" Templates: {app.template_folder}")  
+    print(f" Static: {app.static_folder}") 
+    # Cache y base de datos        
     print(f" DATABASE_URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
     print(f" REDIS_URL: {app.config.get('REDIS_URL')}")
     
@@ -46,7 +50,7 @@ def create_app(config_name='default'):
     
     # Configurar ProxyFix para NGINX
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
-    print(" ProxyFix configurado para NGINX")
+    print("🔧 ProxyFix configurado para NGINX")
     
     # Registrar todos los blueprints (MVC)
     register_blueprints(app)
@@ -55,7 +59,7 @@ def create_app(config_name='default'):
     register_error_handlers(app)
     
     print("\n" + "="*60)
-    print(" APLICACIÓN FLASK INICIALIZADA (Arquitectura MVC)")
+    print("APLICACIÓN FLASK INICIALIZADA (Arquitectura MVC)")
     print("="*60 + "\n")
     
     return app
@@ -66,11 +70,11 @@ def initialize_extensions(app):
     # Base de datos
     db.init_app(app)
     migrate.init_app(app, db)
-    print(" SQLAlchemy y Flask-Migrate inicializados")
+    print("SQLAlchemy y Flask-Migrate inicializados")
     
     # CSRF Protection
     csrf.init_app(app)
-    print(" CSRF Protection activado")
+    print("CSRF Protection activado")
     
     # Redis para caché
     global redis_client
@@ -80,12 +84,12 @@ def initialize_extensions(app):
             decode_responses=True
         )
         redis_client.ping()
-        print(" Redis conectado correctamente")
+        print("Redis conectado correctamente")
         
         # Inicializar gestor de caché
         cache_manager = CacheManager(redis_client)
         app.cache_manager = cache_manager
-        print(" CacheManager inicializado")
+        print("CacheManager inicializado")
         
     except Exception as e:
         print(f" Redis no disponible: {e}")
@@ -95,11 +99,8 @@ def initialize_extensions(app):
 
 # Configurar Swagger para documentación automática de la API REST
 def configure_swagger(app):
-    """
-    Configura Swagger para documentación automática de la API REST
-    Accesible en: /apidocs
-    """
-    
+ 
+    # Plantilla básica de Swagger
     swagger_template = {
         "swagger": "2.0",
         "info": {
@@ -111,6 +112,7 @@ def configure_swagger(app):
                 "url": "https://www.ucjc.edu"
             }
         },
+
         "securityDefinitions": {
             "Bearer": {
                 "type": "apiKey",
@@ -119,18 +121,19 @@ def configure_swagger(app):
                 "description": "JWT Authorization header. Formato: 'Bearer {token}'"
             }
         },
+
         "security": [{"Bearer": []}]
     }
     
     Swagger(app, template=swagger_template)
-    print(" Swagger configurado en /apidocs")
+    print("Swagger configurado en /apidocs")
 
 
 # Registrar blueprints siguiendo arquitectura MVC
 def register_blueprints(app):
     
     
-    print("\n Registrando Blueprints (Arquitectura MVC):")
+    print("\n🔌 Registrando Blueprints (Arquitectura MVC):")
     print("-" * 60)
     
     #  BLUEPRINTS HTML (Vistas Web) 
@@ -152,10 +155,10 @@ def register_blueprints(app):
     csrf.exempt(productos_bp)
     
     app.register_blueprint(usuarios_bp, url_prefix='/api')
-    print(" Blueprint API 'usuarios' registrado en /api")
+    print("Blueprint API 'usuarios' registrado en /api")
     
     app.register_blueprint(productos_bp, url_prefix='/api')
-    print(" Blueprint API 'productos' registrado en /api")
+    print("Blueprint API 'productos' registrado en /api")
     
     print("-" * 60)
     print("Todos los Blueprints registrados correctamente\n")
