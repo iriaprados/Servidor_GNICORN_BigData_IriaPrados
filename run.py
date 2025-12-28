@@ -1,5 +1,6 @@
 
 # ------- Archivo principal para ejecutar la aplicación Flask -------
+
 import os
 import sys
 from dotenv import load_dotenv
